@@ -15,7 +15,7 @@ A render engine for go templates
 
 
 ## Setup
-In templates.go
+in html.go
 ```
 package htmltemplates
 
