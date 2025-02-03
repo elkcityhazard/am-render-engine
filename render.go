@@ -34,9 +34,6 @@ func (tmpCol *TemplateCollection) RenderTemplate(w http.ResponseWriter, r *http.
 	if tmpCol.TemplateData == nil {
 		tmpCol.TemplateData = NewTemplateData()
 	}
-
-	tmpCol.SetStringMapEntry("SiteTitle", "Andrew M McCall")
-
 	//AddTD with r and td here
 
 	err := t.Execute(buf, tmpCol.TemplateData)
