@@ -1,0 +1,440 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>mocks: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/elkcityhazard/am-render-engine/mocks/mocks.go (100.0%)</option>
+				
+				<option value="file1">github.com/elkcityhazard/am-render-engine/render.go (80.0%)</option>
+				
+				<option value="file2">github.com/elkcityhazard/am-render-engine/templates.go (62.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package mocks
+
+import "embed"
+
+//go:embed templates
+
+var mockTemplateFS embed.FS
+
+func GetMockTemplateFS() embed.FS <span class="cov8" title="1">{
+        return mockTemplateFS
+}</span>
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package amrenderengine
+
+import (
+        "bytes"
+        "errors"
+        "fmt"
+        "html/template"
+        "io"
+        "net/http"
+)
+
+func (tmpCol *TemplateCollection) RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string) error <span class="cov8" title="1">{
+
+        tc := make(map[string]*template.Template)
+
+        if tmpCol.UseCache </span><span class="cov8" title="1">{
+                tc = tmpCol.Templates
+        }</span> else<span class="cov8" title="1"> {
+                tmps, err := tmpCol.CreateTemplateCache()
+
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                <span class="cov8" title="1">tc = tmps</span>
+        }
+
+        <span class="cov8" title="1">t, ok := tc[tmpl]
+
+        if !ok </span><span class="cov8" title="1">{
+                return errors.New("could not get template from template cache")
+        }</span>
+
+        <span class="cov8" title="1">buf := &amp;bytes.Buffer{}
+
+        if tmpCol.TemplateData == nil </span><span class="cov8" title="1">{
+                tmpCol.TemplateData = NewTemplateData()
+        }</span>
+        //AddTD with r and td here
+
+        <span class="cov8" title="1">err := t.Execute(buf, tmpCol.TemplateData)
+
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">mimetype, err := tmpCol.SetContentType(buf)
+
+        if len(mimetype) &gt; 0 </span><span class="cov0" title="0">{
+                w.Header().Set("Content-Type", mimetype)
+        }</span> else<span class="cov8" title="1"> {
+                w.Header().Set("Content-Type", "text/html")
+        }</span>
+
+        <span class="cov8" title="1">fmt.Println(string(buf.Bytes()))
+
+        _, err = buf.WriteTo(w)
+
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+
+}
+
+func (tmpCol *TemplateCollection) SetContentType(buf *bytes.Buffer) (string, error) <span class="cov8" title="1">{
+        // copy the buf to a new tmp buf to detect content type
+        tmpBuf := *buf
+        hdrBuf := make([]byte, 512)
+        _, err := io.ReadFull(&amp;tmpBuf, hdrBuf)
+        if err != nil </span><span class="cov8" title="1">{
+                return "", nil
+        }</span>
+        <span class="cov0" title="0">mimetype := http.DetectContentType(hdrBuf)
+        hdrBuf = nil
+        tmpBuf = bytes.Buffer{}
+        return mimetype, nil</span>
+}
+
+func (tmpCol *TemplateCollection) AddCSRFToken(csrfToken string) <span class="cov8" title="1">{
+        tmpCol.TemplateData.CSRFToken = csrfToken
+}</span>
+
+func (tmpCol *TemplateCollection) SetIsProduction(isProduction bool) <span class="cov8" title="1">{
+        tmpCol.TemplateData.IsProduction = isProduction
+}</span>
+
+func (tmpCol *TemplateCollection) SetIsAuthenticated(isAuthenticated bool) <span class="cov8" title="1">{
+        tmpCol.TemplateData.IsAuthenticated = isAuthenticated
+}</span>
+
+func (tmpCol *TemplateCollection) SetStringMapEntry(key, val string) <span class="cov8" title="1">{
+        tmpCol.TemplateData.StringMap[key] = val
+}</span>
+
+func (tmpCol *TemplateCollection) SetIntMapEntry(key string, val int) <span class="cov8" title="1">{
+        tmpCol.TemplateData.IntMap[key] = val
+}</span>
+
+func (tmpCol *TemplateCollection) SetDataMapEntry(key string, val any) <span class="cov8" title="1">{
+        tmpCol.TemplateData.Data[key] = val
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package amrenderengine
+
+import (
+        "embed"
+        "errors"
+        "fmt"
+        "html/template"
+        "path/filepath"
+)
+
+func NewTemplateCollection(emb embed.FS, tmpPath string) *TemplateCollection <span class="cov8" title="1">{
+        return &amp;TemplateCollection{
+                EmbeddedFS:             emb,
+                PathToTemplates:        tmpPath,
+                Templates:              make(map[string]*template.Template),
+                TemplateFuncs:          nil,
+                TemplateData:           NewTemplateData(),
+                UseCache:               true,
+                TemplatePageDirPath:    "",
+                TemplateLayoutDirPath:  "",
+                TemplatePartialDirPath: "",
+                FileExt:                "",
+        }
+}</span>
+
+func NewTemplateData() *TemplateData <span class="cov8" title="1">{
+        return &amp;TemplateData{
+                StringMap:       make(map[string]string),
+                BoolMap:         make(map[string]bool),
+                IntMap:          make(map[string]int),
+                Data:            make(map[string]any),
+                IsProduction:    false,
+                IsAuthenticated: false,
+                CSRFToken:       "",
+                Form:            *NewTemplateForm(),
+                FlashMsg:        "",
+                WarnMsg:         "",
+                ErrorMsg:        "",
+        }
+
+}</span>
+
+func NewTemplateForm() *TemplateForm <span class="cov8" title="1">{
+        return &amp;TemplateForm{
+                Form:   nil,
+                Errors: make(TemplateFormErrors),
+        }
+}</span>
+
+func (tmpCol *TemplateCollection) SetDirPaths(pages, layouts, partials, ext string) <span class="cov8" title="1">{
+
+        tmpCol.TemplatePageDirPath = pages
+        tmpCol.TemplateLayoutDirPath = layouts
+        tmpCol.TemplatePartialDirPath = partials
+        tmpCol.FileExt = ext
+
+}</span>
+
+func (tmpCol *TemplateCollection) CreateTemplateCache() (map[string]*template.Template, error) <span class="cov8" title="1">{
+
+        arePathsSet := tmpCol.CheckForTemplatePathsAndExt()
+
+        if !arePathsSet </span><span class="cov8" title="1">{
+                return nil, errors.New("missing template data")
+        }</span>
+
+        <span class="cov8" title="1">if tmpCol.UseCache </span><span class="cov8" title="1">{
+                tc, err := tmpCol.BuildTemplateCacheFromEmbed()
+
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov8" title="1">tmpCol.Templates = tc</span>
+        } else<span class="cov8" title="1"> {
+                tc, err := tmpCol.BuildTemplateCacheFromHost()
+
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov8" title="1">tmpCol.Templates = tc</span>
+
+        }
+
+        <span class="cov8" title="1">return tmpCol.Templates, nil</span>
+
+}
+
+func (tmpCol *TemplateCollection) BuildTemplateCacheFromEmbed() (map[string]*template.Template, error) <span class="cov8" title="1">{
+
+        fs := tmpCol.EmbeddedFS
+
+        pages, err := fs.ReadDir(tmpCol.TemplatePageDirPath)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">for i := range pages </span><span class="cov8" title="1">{
+
+                tmpl, err := template.New(pages[i].Name()).Funcs(tmpCol.TemplateFuncs).ParseFS(fs, fmt.Sprintf("%s/%s", tmpCol.TemplatePageDirPath, pages[i].Name()))
+
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov8" title="1">layouts, err := fs.ReadDir(tmpCol.TemplateLayoutDirPath)
+
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov8" title="1">if len(layouts) &gt; 0 </span><span class="cov8" title="1">{
+                        for _, l := range layouts </span><span class="cov8" title="1">{
+                                tmpl, err = tmpl.ParseFS(fs, fmt.Sprintf("%s/%s", tmpCol.TemplateLayoutDirPath, l.Name()))
+                                if err != nil </span><span class="cov0" title="0">{
+                                        return nil, err
+                                }</span>
+                        }
+                }
+
+                <span class="cov8" title="1">partials, err := fs.ReadDir(tmpCol.TemplatePartialDirPath)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov8" title="1">if len(partials) &gt; 0 </span><span class="cov8" title="1">{
+                        for _, p := range partials </span><span class="cov8" title="1">{
+                                tmpl, err = tmpl.ParseFS(fs, fmt.Sprintf("%s/%s", tmpCol.TemplatePartialDirPath, p.Name()))
+                        }</span>
+                }
+
+                <span class="cov8" title="1">tmpCol.Templates[pages[i].Name()] = tmpl</span>
+
+        }
+
+        <span class="cov8" title="1">return tmpCol.Templates, nil</span>
+
+}
+
+func (tmpCol *TemplateCollection) BuildTemplateCacheFromHost() (map[string]*template.Template, error) <span class="cov8" title="1">{
+
+        pages, err := filepath.Glob(fmt.Sprintf("%s/%s/*.%s", tmpCol.PathToTemplates, tmpCol.TemplatePageDirPath, tmpCol.FileExt))
+
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">for i := range pages </span><span class="cov0" title="0">{
+                name := filepath.Base(pages[i])
+
+                ts, err := template.New(name).Funcs(tmpCol.TemplateFuncs).ParseFiles(pages[i])
+
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov0" title="0">layoutMatches, err := filepath.Glob(
+                        fmt.Sprintf("%s/%s/*.%s",
+                                tmpCol.PathToTemplates,
+                                tmpCol.TemplateLayoutDirPath,
+                                tmpCol.FileExt))
+
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov0" title="0">if len(layoutMatches) &gt; 0 </span><span class="cov0" title="0">{
+                        ts, err = ts.ParseGlob(
+                                fmt.Sprintf("%s/%s/*.%s",
+                                        tmpCol.PathToTemplates,
+                                        tmpCol.TemplateLayoutDirPath,
+                                        tmpCol.FileExt))
+                        if err != nil </span><span class="cov0" title="0">{
+                                return nil, err
+                        }</span>
+                }
+
+                <span class="cov0" title="0">partialMatches, err := filepath.Glob(
+                        fmt.Sprintf("%s/%s/*.%s",
+                                tmpCol.PathToTemplates,
+                                tmpCol.TemplatePartialDirPath,
+                                tmpCol.FileExt))
+
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, err
+                }</span>
+
+                <span class="cov0" title="0">if len(partialMatches) &gt; 0 </span><span class="cov0" title="0">{
+                        ts, err = ts.ParseGlob(
+                                fmt.Sprintf("%s/%s/*.%s",
+                                        tmpCol.PathToTemplates,
+                                        tmpCol.TemplatePartialDirPath,
+                                        tmpCol.FileExt))
+                        if err != nil </span><span class="cov0" title="0">{
+                                return nil, err
+                        }</span>
+                }
+
+                <span class="cov0" title="0">tmpCol.Templates[name] = ts</span>
+
+        }
+
+        <span class="cov8" title="1">return tmpCol.Templates, nil</span>
+
+}
+
+// CheckForTemplatePathsAndExt make sure that the paths to the template directories are set in *TemplateCollection
+// As well as a well as a FileExt
+// it returns a bool
+func (tmpCol *TemplateCollection) CheckForTemplatePathsAndExt() bool <span class="cov8" title="1">{
+        if tmpCol.TemplateLayoutDirPath == "" || tmpCol.TemplatePageDirPath == "" || tmpCol.TemplatePartialDirPath == "" || tmpCol.FileExt == "" </span><span class="cov8" title="1">{
+                return false
+        }</span>
+        <span class="cov8" title="1">return true</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

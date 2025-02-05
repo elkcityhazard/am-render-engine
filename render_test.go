@@ -60,7 +60,7 @@ func Test_RenderTemplate(t *testing.T) {
 	for _, tt := range tests {
 		var mockHandler http.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-			err := mockTC.RenderTemplate(w, r, tt.pageName)
+			err := GetRenderer().RenderTemplate(w, r, tt.pageName)
 
 			if err != nil && tt.pageName != "nonexist.gohtml" {
 				t.Error("expected nil error but got", err.Error())
@@ -91,12 +91,18 @@ func Test_RenderTemplate(t *testing.T) {
 
 			defer result.Body.Close()
 
+			if len(result.Header["Content-Type"]) > 0 && !strings.Contains(result.Header["Content-Type"][0], "text/html") {
+				t.Error("expected text/html Content Type")
+			}
+
 			body, err := io.ReadAll(result.Body)
 
 			if err != nil && tt.pageName != "nonexist.gohtml" {
 
 				t.Error("expected a body but got", err.Error())
 			}
+
+			t.Log(string(body))
 
 			if !strings.Contains(string(body), "Content Here") && tt.pageName != "nonexist.gohtml" {
 				t.Error("expected content on page, but got none")

@@ -3,7 +3,7 @@ package amrenderengine
 import (
 	"testing"
 
-	"github.com/elkcityhazard/git-line-counter/pkg/templates/mocks"
+	"github.com/elkcityhazard/am-render-engine/mocks"
 )
 
 func Test_NewTemplateCollection(t *testing.T) {
