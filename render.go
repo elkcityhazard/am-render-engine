@@ -3,7 +3,6 @@ package amrenderengine
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"html/template"
 	"net/http"
 )
@@ -50,8 +49,6 @@ func (tmpCol *TemplateCollection) RenderTemplate(w http.ResponseWriter, r *http.
 	} else {
 		w.Header().Set("Content-Type", "text/html")
 	}
-
-	fmt.Println(string(buf.Bytes()))
 
 	_, err = buf.WriteTo(w)
 
